@@ -5,7 +5,8 @@ from torch.autograd import Function
 from torch.autograd.function import once_differentiable
 from torch.nn.modules.utils import _pair
 
-from .roi_align_rotated_cuda import roi_align_rotated_forward, roi_align_rotated_backward
+# change-off cuda
+from .roi_align_rotated_cpu import roi_align_rotated_forward, roi_align_rotated_backward
 
 
 class _ROIAlignRotated(Function):

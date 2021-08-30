@@ -4,7 +4,7 @@ import subprocess
 import time
 
 from setuptools import Extension, dist, find_packages, setup
-from torch.utils.cpp_extension import BuildExtension, CUDAExtension
+from torch.utils.cpp_extension import BuildExtension, CUDAExtension, CppExtension
 
 dist.Distribution().fetch_build_eggs(['Cython', 'numpy>=1.11.1'])
 import numpy as np  # noqa: E402, isort:skip
@@ -106,6 +106,16 @@ def make_cuda_ext(name, module, sources):
         })
 
 
+def make_cpp_ext(name, module, sources):
+    return CppExtension(
+        name='{}.{}'.format(module, name),
+        sources=[os.path.join(*module.split('.'), p) for p in sources],
+        extra_compile_args={
+            'cxx': ['-Wdeprecated-declarations', '-Wrange-loop-analysis',
+                    '-Wno-unused-function', '-Wno-write-strings'],
+        })
+
+
 def make_cython_ext(name, module, sources):
     extra_compile_args = None
     if platform.system() != 'Windows':
@@ -163,76 +173,101 @@ if __name__ == '__main__':
                 name='soft_nms_cpu',
                 module='mmdet.ops.nms',
                 sources=['src/soft_nms_cpu.pyx']),
-            make_cuda_ext(
+            # make_cuda_ext(
+            #     name='nms_cpu',
+            #     module='mmdet.ops.nms',
+            #     sources=['src/nms_cpu.cpp']),
+            # make_cuda_ext(
+            #     name='nms_cuda',
+            #     module='mmdet.ops.nms',
+            #     sources=['src/nms_cuda.cpp', 'src/nms_kernel.cu']),
+            # make_cuda_ext(
+            #     name='roi_align_cuda',
+            #     module='mmdet.ops.roi_align',
+            #     sources=['src/roi_align_cuda.cpp', 'src/roi_align_kernel.cu']),
+            # make_cuda_ext(
+            #     name='roi_pool_cuda',
+            #     module='mmdet.ops.roi_pool',
+            #     sources=['src/roi_pool_cuda.cpp', 'src/roi_pool_kernel.cu']),
+            # make_cuda_ext(
+            #     name='deform_conv_cuda',
+            #     module='mmdet.ops.dcn',
+            #     sources=[
+            #         'src/deform_conv_cuda.cpp',
+            #         'src/deform_conv_cuda_kernel.cu'
+            #     ]),
+            # make_cuda_ext(
+            #     name='deform_pool_cuda',
+            #     module='mmdet.ops.dcn',
+            #     sources=[
+            #         'src/deform_pool_cuda.cpp',
+            #         'src/deform_pool_cuda_kernel.cu'
+            #     ]),
+            # make_cuda_ext(
+            #     name='sigmoid_focal_loss_cuda',
+            #     module='mmdet.ops.sigmoid_focal_loss',
+            #     sources=[
+            #         'src/sigmoid_focal_loss.cpp',
+            #         'src/sigmoid_focal_loss_cuda.cu'
+            #     ]),
+            # make_cuda_ext(
+            #     name='masked_conv2d_cuda',
+            #     module='mmdet.ops.masked_conv',
+            #     sources=[
+            #         'src/masked_conv2d_cuda.cpp', 'src/masked_conv2d_kernel.cu'
+            #     ]),
+            # make_cuda_ext(
+            #     name='box_iou_rotated_cuda',
+            #     module='mmdet.ops.box_iou_rotated',
+            #     sources=['src/box_iou_rotated_cpu.cpp', 'src/box_iou_rotated_cuda.cu']),
+            # make_cuda_ext(
+            #     name='nms_rotated_cuda',
+            #     module='mmdet.ops.nms_rotated',
+            #     sources=['src/nms_rotated_cpu.cpp', 'src/nms_rotated_cuda.cu']),
+            # make_cuda_ext(
+            #     name='ml_nms_rotated_cuda',
+            #     module='mmdet.ops.ml_nms_rotated',
+            #     sources=['src/nms_rotated_cpu.cpp', 'src/nms_rotated_cuda.cu']),
+            # make_cuda_ext(
+            #     name='roi_align_rotated_cuda',
+            #     module='mmdet.ops.roi_align_rotated',
+            #     sources=['src/ROIAlignRotated_cpu.cpp', 'src/ROIAlignRotated_cuda.cu']),
+            # make_cuda_ext(
+            #     name='orn_cuda',
+            #     module='mmdet.ops.orn',
+            #     sources=['src/vision.cpp',
+            #              'src/cpu/ActiveRotatingFilter_cpu.cpp', 'src/cpu/RotationInvariantEncoding_cpu.cpp',
+            #              'src/cuda/ActiveRotatingFilter_cuda.cu', 'src/cuda/RotationInvariantEncoding_cuda.cu',
+            #              ]),
+            # make_cuda_ext(
+            #     name='sort_vertices_cuda',
+            #     module='mmdet.ops.box_iou_rotated_diff',
+            #     sources=['src/sort_vert.cpp', 'src/sort_vert_kernel.cu',]),
+            make_cpp_ext(
                 name='nms_cpu',
                 module='mmdet.ops.nms',
                 sources=['src/nms_cpu.cpp']),
-            make_cuda_ext(
-                name='nms_cuda',
-                module='mmdet.ops.nms',
-                sources=['src/nms_cuda.cpp', 'src/nms_kernel.cu']),
-            make_cuda_ext(
-                name='roi_align_cuda',
-                module='mmdet.ops.roi_align',
-                sources=['src/roi_align_cuda.cpp', 'src/roi_align_kernel.cu']),
-            make_cuda_ext(
-                name='roi_pool_cuda',
-                module='mmdet.ops.roi_pool',
-                sources=['src/roi_pool_cuda.cpp', 'src/roi_pool_kernel.cu']),
-            make_cuda_ext(
-                name='deform_conv_cuda',
-                module='mmdet.ops.dcn',
-                sources=[
-                    'src/deform_conv_cuda.cpp',
-                    'src/deform_conv_cuda_kernel.cu'
-                ]),
-            make_cuda_ext(
-                name='deform_pool_cuda',
-                module='mmdet.ops.dcn',
-                sources=[
-                    'src/deform_pool_cuda.cpp',
-                    'src/deform_pool_cuda_kernel.cu'
-                ]),
-            make_cuda_ext(
-                name='sigmoid_focal_loss_cuda',
-                module='mmdet.ops.sigmoid_focal_loss',
-                sources=[
-                    'src/sigmoid_focal_loss.cpp',
-                    'src/sigmoid_focal_loss_cuda.cu'
-                ]),
-            make_cuda_ext(
-                name='masked_conv2d_cuda',
-                module='mmdet.ops.masked_conv',
-                sources=[
-                    'src/masked_conv2d_cuda.cpp', 'src/masked_conv2d_kernel.cu'
-                ]),
-            make_cuda_ext(
-                name='box_iou_rotated_cuda',
+            make_cpp_ext(
+                name='box_iou_rotated_cpu',
                 module='mmdet.ops.box_iou_rotated',
-                sources=['src/box_iou_rotated_cpu.cpp', 'src/box_iou_rotated_cuda.cu']),
-            make_cuda_ext(
-                name='nms_rotated_cuda',
+                sources=['src/box_iou_rotated_cpu.cpp']),
+            make_cpp_ext(
+                name='nms_rotated_cpu',
                 module='mmdet.ops.nms_rotated',
-                sources=['src/nms_rotated_cpu.cpp', 'src/nms_rotated_cuda.cu']),
-            make_cuda_ext(
-                name='ml_nms_rotated_cuda',
+                sources=['src/nms_rotated_cpu.cpp']),
+            make_cpp_ext(
+                name='ml_nms_rotated_cpu',
                 module='mmdet.ops.ml_nms_rotated',
-                sources=['src/nms_rotated_cpu.cpp', 'src/nms_rotated_cuda.cu']),
-            make_cuda_ext(
-                name='roi_align_rotated_cuda',
+                sources=['src/nms_rotated_cpu.cpp']),
+            make_cpp_ext(
+                name='roi_align_rotated_cpu',
                 module='mmdet.ops.roi_align_rotated',
-                sources=['src/ROIAlignRotated_cpu.cpp', 'src/ROIAlignRotated_cuda.cu']),
-            make_cuda_ext(
-                name='orn_cuda',
+                sources=['src/ROIAlignRotated_cpu.cpp']),
+            make_cpp_ext(
+                name='orn_cpu',
                 module='mmdet.ops.orn',
                 sources=['src/vision.cpp',
-                         'src/cpu/ActiveRotatingFilter_cpu.cpp', 'src/cpu/RotationInvariantEncoding_cpu.cpp',
-                         'src/cuda/ActiveRotatingFilter_cuda.cu', 'src/cuda/RotationInvariantEncoding_cuda.cu',
-                         ]),
-            make_cuda_ext(
-                name='sort_vertices_cuda',
-                module='mmdet.ops.box_iou_rotated_diff',
-                sources=['src/sort_vert.cpp', 'src/sort_vert_kernel.cu',]),
+                         'src/cpu/ActiveRotatingFilter_cpu.cpp', 'src/cpu/RotationInvariantEncoding_cpu.cpp']),
         ],
         cmdclass={'build_ext': BuildExtension},
         zip_safe=False)
